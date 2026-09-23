@@ -6,16 +6,49 @@ import plotly.express as px
 # Page configuration
 st.set_page_config(
     page_title="Supply Chain Analytics Platform",
-    page_icon="🚚",
     layout="wide"
 )
+
+# Custom CSS for UI Theme, Times New Roman Typography, and Clean Components
+st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
+    
+    html, body, [class*="css"], .stMarkdown, h1, h2, h3, h4, h5, h6, p, label, button, input {
+        font-family: 'Times New Roman', Times, serif !important;
+    }
+    
+    /* Clean, elevated Metric Cards */
+    [data-testid="stMetric"] {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        padding: 15px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background-color: #f1f3f5;
+        border-right: 1px solid #dee2e6;
+    }
+    
+    .sidebar-footer {
+        position: fixed;
+        bottom: 20px;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 16px;
+        font-weight: bold;
+        color: #343a40;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # Build SQLite Database dynamically from uploaded CSV files
 @st.cache_data
 def init_and_load_data():
     conn = sqlite3.connect(":memory:", check_same_thread=False)
     
-    # Mapping uploaded CSV files to SQLite database tables
     csv_table_mapping = {
         "1_warehouses_large.csv": "warehouses",
         "2_suppliers_large.csv": "suppliers",
@@ -34,9 +67,8 @@ def init_and_load_data():
             df = pd.read_csv(csv_file)
             df.to_sql(table_name, conn, if_exists="replace", index=False)
         except Exception:
-            pass # Handles cases if specific CSV is omitted
+            pass
 
-    # Query shipments and inventory views
     shipments_df = pd.read_sql("""
         SELECT 
             s.shipment_id, s.order_id, s.carrier_id, c.carrier_name, c.transport_mode,
@@ -67,26 +99,34 @@ except Exception as e:
     st.error(f"Error initializing database from CSVs: {e}")
     st.stop()
 
-# Navigation Sidebar
-st.sidebar.title("🚚 Supply Chain OS")
+# Clean Navigation Sidebar without logos
+st.sidebar.title("Supply Chain OS")
 st.sidebar.caption("Logistics & Warehouse Intelligence")
 
 nav_selection = st.sidebar.radio(
     "Navigation Menu",
     [
-        "📌 Executive Logistics Dashboard",
-        "📊 Delivery Delay & Carrier Performance",
-        "📦 Warehouse Inventory Analytics",
-        "🔮 Real-Time Delay Risk Simulator"
+        "Executive Logistics Dashboard",
+        "Delivery Delay & Carrier Performance",
+        "Warehouse Inventory Analytics",
+        "Real-Time Delay Risk Simulator"
     ]
 )
 
-st.sidebar.markdown("---")
-st.sidebar.markdown("**Developer:** ABHISHEK AHIRE")
+st.sidebar.markdown("<br><br>", unsafe_allow_html=True)
+st.sidebar.markdown('<div class="sidebar-footer">Abhishek</div>', unsafe_allow_html=True)
+
+# Common chart layout settings for sharp rendering
+chart_layout = dict(
+    font=dict(family="Times New Roman", size=13),
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    margin=dict(l=20, r=20, t=30, b=20)
+)
 
 # Page 1: Executive Dashboard
-if nav_selection == "📌 Executive Logistics Dashboard":
-    st.title("🚚 Executive Logistics Control Center")
+if nav_selection == "Executive Logistics Dashboard":
+    st.title("Executive Logistics Control Center")
     st.markdown("---")
     
     col1, col2, col3, col4 = st.columns(4)
@@ -102,55 +142,78 @@ if nav_selection == "📌 Executive Logistics Dashboard":
         st.subheader("Shipping Cost vs Distance Trajectory")
         fig1 = px.scatter(
             shipments_df, x='distance_km', y='shipping_cost_inr',
-            color='transport_mode', hover_data=['origin_city', 'destination_city']
+            color='transport_mode', hover_data=['origin_city', 'destination_city'],
+            color_discrete_sequence=px.colors.qualitative.Dark24
         )
+        fig1.update_layout(**chart_layout)
+        fig1.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#f0f0f0')
+        fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#f0f0f0')
         st.plotly_chart(fig1, use_container_width=True)
         
     with col_b:
         st.subheader("Primary Causes of Logistics Delays")
         fig2 = px.pie(
             shipments_df['delay_reason'].value_counts().reset_index(), 
-            values='count', names='delay_reason', hole=0.4
+            values='count', names='delay_reason', hole=0.5,
+            color_discrete_sequence=px.colors.qualitative.Set2
         )
+        fig2.update_layout(**chart_layout)
+        fig2.update_traces(textinfo='percent+label', marker=dict(line=dict(color='#ffffff', width=2)))
         st.plotly_chart(fig2, use_container_width=True)
 
 # Page 2: Carrier Performance
-elif nav_selection == "📊 Delivery Delay & Carrier Performance":
-    st.title("📊 Carrier Reliability & Route Diagnostics")
+elif nav_selection == "Delivery Delay & Carrier Performance":
+    st.title("Carrier Reliability & Route Diagnostics")
     st.markdown("---")
     
     col_c1, col_c2 = st.columns(2)
     with col_c1:
         st.subheader("Average Delay by Transport Mode")
         mode_delay = shipments_df.groupby('transport_mode')['delay_days'].mean().reset_index()
-        fig3 = px.bar(mode_delay, x='transport_mode', y='delay_days', color='delay_days')
+        fig3 = px.bar(mode_delay, x='transport_mode', y='delay_days', color='transport_mode',
+                      color_discrete_sequence=px.colors.qualitative.Bold)
+        fig3.update_layout(**chart_layout)
+        fig3.update_xaxes(showgrid=False)
+        fig3.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#f0f0f0')
         st.plotly_chart(fig3, use_container_width=True)
 
     with col_c2:
         st.subheader("Customer Satisfaction vs Delay Days")
-        fig4 = px.box(shipments_df, x='customer_satisfaction_score', y='delay_days', color='customer_satisfaction_score')
+        fig4 = px.box(shipments_df, x='customer_satisfaction_score', y='delay_days', 
+                      color_discrete_sequence=['#2b5c8f'])
+        fig4.update_layout(**chart_layout)
+        fig4.update_xaxes(showgrid=False)
+        fig4.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#f0f0f0')
         st.plotly_chart(fig4, use_container_width=True)
 
 # Page 3: Warehouse Inventory Analytics
-elif nav_selection == "📦 Warehouse Inventory Analytics":
-    st.title("📦 Warehouse Inventory & Stock Levels")
+elif nav_selection == "Warehouse Inventory Analytics":
+    st.title("Warehouse Inventory & Stock Levels")
     st.markdown("---")
     
     col_w1, col_w2 = st.columns(2)
     with col_w1:
         st.subheader("Stock Valuation by Category")
         cat_val = inventory_df.groupby('category')['inventory_value_inr'].sum().reset_index()
-        fig5 = px.bar(cat_val, x='category', y='inventory_value_inr', color='inventory_value_inr')
+        fig5 = px.bar(cat_val, x='category', y='inventory_value_inr', color='category',
+                      color_discrete_sequence=px.colors.qualitative.Safe)
+        fig5.update_layout(**chart_layout)
+        fig5.update_xaxes(showgrid=False)
+        fig5.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#f0f0f0')
         st.plotly_chart(fig5, use_container_width=True)
 
     with col_w2:
         st.subheader("Available Stock vs Reorder Level")
-        fig6 = px.scatter(inventory_df, x='reorder_level', y='available_stock', color='category')
+        fig6 = px.scatter(inventory_df, x='reorder_level', y='available_stock', color='category',
+                          color_discrete_sequence=px.colors.qualitative.Vivid)
+        fig6.update_layout(**chart_layout)
+        fig6.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#f0f0f0')
+        fig6.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#f0f0f0')
         st.plotly_chart(fig6, use_container_width=True)
 
 # Page 4: Delay Risk Simulator
-elif nav_selection == "🔮 Real-Time Delay Risk Simulator":
-    st.title("🔮 Predictive Shipment Delay Simulator")
+elif nav_selection == "Real-Time Delay Risk Simulator":
+    st.title("Predictive Shipment Delay Simulator")
     st.markdown("---")
     
     col_s1, col_s2, col_s3 = st.columns(3)
@@ -162,4 +225,5 @@ elif nav_selection == "🔮 Real-Time Delay Risk Simulator":
     if priority_input == 'Urgent':
         base_delay *= 0.5
         
+    st.markdown("---")
     st.markdown(f"### Estimated Shipment Transit Delay: **{round(base_delay, 1)} Days**")
