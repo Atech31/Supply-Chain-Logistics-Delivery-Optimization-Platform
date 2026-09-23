@@ -3,72 +3,84 @@ import pandas as pd
 import sqlite3
 import plotly.express as px
 
-# Page configuration
+# 1. Page Configuration
 st.set_page_config(
     page_title="Supply Chain Analytics Platform",
     layout="wide"
 )
 
-# Custom CSS for Dark Grey/Black Theme and Times New Roman Typography
+# 2. Comprehensive Dark Theme CSS Overrides
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
-    
-    /* Main Background & Text Color */
-    .stApp, [data-testid="stHeader"] {
-        background-color: #121212 !important;
-        color: #e0e0e0 !important;
-    }
-    
-    html, body, [class*="css"], .stMarkdown, h1, h2, h3, h4, h5, h6, p, label, button, input, span {
+
+    /* Global Font & Background Setup */
+    html, body, .stApp, [data-testid="stHeader"], [data-testid="stSidebar"] {
+        background-color: #0e0e10 !important;
+        color: #ffffff !important;
         font-family: 'Times New Roman', Times, serif !important;
-        color: #e0e0e0 !important;
     }
-    
-    /* Dark Surface Metric Cards */
+
+    /* Force ALL Text, Headers, Paragraphs, and Labels to White/Light Grey */
+    h1, h2, h3, h4, h5, h6, p, span, div, label, li, a {
+        color: #ffffff !important;
+        font-family: 'Times New Roman', Times, serif !important;
+    }
+
+    /* Metric Cards Styling (Dark Card + Bright White Numbers) */
     [data-testid="stMetric"] {
-        background-color: #1e1e1e !important;
-        border: 1px solid #333333 !important;
-        border-radius: 6px;
-        padding: 15px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        background-color: #1a1a1e !important;
+        border: 1px solid #2d2d35 !important;
+        border-radius: 8px !important;
+        padding: 16px !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4) !important;
     }
-    
-    [data-testid="stMetricValue"] > div {
+
+    [data-testid="stMetricValue"] * {
+        color: #ffffff !important;
+        font-size: 32px !important;
+        font-weight: bold !important;
+    }
+
+    [data-testid="stMetricLabel"] * {
+        color: #b0b3c6 !important;
+        font-size: 14px !important;
+    }
+
+    /* Sidebar Customization */
+    [data-testid="stSidebar"] {
+        background-color: #141418 !important;
+        border-right: 1px solid #2d2d35 !important;
+    }
+
+    /* Form Controls & Dropdown Fixes for Dark Mode */
+    div[class*="stSelectbox"], div[class*="stSlider"] {
         color: #ffffff !important;
     }
-    
-    [data-testid="stMetricLabel"] {
-        color: #aaaaaa !important;
+
+    .stSelectbox > div > div {
+        background-color: #1a1a1e !important;
+        color: #ffffff !important;
+        border: 1px solid #333340 !important;
     }
-    
-    /* Dark Sidebar styling */
-    [data-testid="stSidebar"] {
-        background-color: #181818 !important;
-        border-right: 1px solid #2d2d2d !important;
-    }
-    
-    /* Form inputs / Radio buttons dark mode */
-    .stRadio label {
-        color: #d0d0d0 !important;
-    }
-    
+
+    /* Fixed Sidebar Footer for Name */
     .sidebar-footer {
         position: fixed;
         bottom: 20px;
-        font-family: 'Times New Roman', Times, serif;
-        font-size: 16px;
-        font-weight: bold;
-        color: #cccccc;
+        font-family: 'Times New Roman', Times, serif !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
+        color: #ffffff !important;
     }
-    
+
     hr {
-        border-color: #333333 !important;
+        border-color: #2d2d35 !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# Build SQLite Database dynamically from uploaded CSV files
+# 3. Database Initialization
 @st.cache_data
 def init_and_load_data():
     conn = sqlite3.connect(":memory:", check_same_thread=False)
@@ -120,10 +132,10 @@ def init_and_load_data():
 try:
     shipments_df, inventory_df = init_and_load_data()
 except Exception as e:
-    st.error(f"Error initializing database from CSVs: {e}")
+    st.error(f"Error loading database context: {e}")
     st.stop()
 
-# Clean Navigation Sidebar without logos
+# 4. Clean Navigation Sidebar
 st.sidebar.title("Supply Chain OS")
 st.sidebar.caption("Logistics & Warehouse Intelligence")
 
@@ -140,16 +152,24 @@ nav_selection = st.sidebar.radio(
 st.sidebar.markdown("<br><br>", unsafe_allow_html=True)
 st.sidebar.markdown('<div class="sidebar-footer">Abhishek</div>', unsafe_allow_html=True)
 
-# Common dark theme chart layout settings
-chart_layout = dict(
-    font=dict(family="Times New Roman", size=13, color="#e0e0e0"),
+# 5. Universal High-Contrast Plotly Theme
+dark_chart_layout = dict(
+    font=dict(family="Times New Roman", size=13, color="#ffffff"),
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
     margin=dict(l=20, r=20, t=30, b=20),
-    legend=dict(font=dict(color="#e0e0e0"))
+    legend=dict(font=dict(color="#ffffff", size=12)),
+    xaxis=dict(
+        showgrid=True, gridwidth=1, gridcolor="#22222a",
+        tickfont=dict(color="#ffffff"), title_font=dict(color="#ffffff")
+    ),
+    yaxis=dict(
+        showgrid=True, gridwidth=1, gridcolor="#22222a",
+        tickfont=dict(color="#ffffff"), title_font=dict(color="#ffffff")
+    )
 )
 
-# Page 1: Executive Dashboard
+# --- PAGE 1: Executive Logistics Dashboard ---
 if nav_selection == "Executive Logistics Dashboard":
     st.title("Executive Logistics Control Center")
     st.markdown("---")
@@ -168,11 +188,9 @@ if nav_selection == "Executive Logistics Dashboard":
         fig1 = px.scatter(
             shipments_df, x='distance_km', y='shipping_cost_inr',
             color='transport_mode', hover_data=['origin_city', 'destination_city'],
-            color_discrete_sequence=px.colors.qualitative.Pastel
+            color_discrete_sequence=px.colors.qualitative.Bold
         )
-        fig1.update_layout(**chart_layout)
-        fig1.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#2a2a2a', title_font=dict(color="#e0e0e0"))
-        fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#2a2a2a', title_font=dict(color="#e0e0e0"))
+        fig1.update_layout(**dark_chart_layout)
         st.plotly_chart(fig1, use_container_width=True)
         
     with col_b:
@@ -180,13 +198,13 @@ if nav_selection == "Executive Logistics Dashboard":
         fig2 = px.pie(
             shipments_df['delay_reason'].value_counts().reset_index(), 
             values='count', names='delay_reason', hole=0.5,
-            color_discrete_sequence=px.colors.qualitative.Dark24
+            color_discrete_sequence=px.colors.qualitative.Pastel
         )
-        fig2.update_layout(**chart_layout)
-        fig2.update_traces(textinfo='percent+label', marker=dict(line=dict(color='#1e1e1e', width=2)))
+        fig2.update_layout(**dark_chart_layout)
+        fig2.update_traces(textinfo='percent+label', textfont_color="#ffffff", marker=dict(line=dict(color='#0e0e10', width=2)))
         st.plotly_chart(fig2, use_container_width=True)
 
-# Page 2: Carrier Performance
+# --- PAGE 2: Carrier Performance ---
 elif nav_selection == "Delivery Delay & Carrier Performance":
     st.title("Carrier Reliability & Route Diagnostics")
     st.markdown("---")
@@ -196,22 +214,18 @@ elif nav_selection == "Delivery Delay & Carrier Performance":
         st.subheader("Average Delay by Transport Mode")
         mode_delay = shipments_df.groupby('transport_mode')['delay_days'].mean().reset_index()
         fig3 = px.bar(mode_delay, x='transport_mode', y='delay_days', color='transport_mode',
-                      color_discrete_sequence=px.colors.qualitative.Set3)
-        fig3.update_layout(**chart_layout)
-        fig3.update_xaxes(showgrid=False)
-        fig3.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#2a2a2a')
+                      color_discrete_sequence=px.colors.qualitative.Safe)
+        fig3.update_layout(**dark_chart_layout)
         st.plotly_chart(fig3, use_container_width=True)
 
     with col_c2:
         st.subheader("Customer Satisfaction vs Delay Days")
         fig4 = px.box(shipments_df, x='customer_satisfaction_score', y='delay_days', 
-                      color_discrete_sequence=['#4a90e2'])
-        fig4.update_layout(**chart_layout)
-        fig4.update_xaxes(showgrid=False)
-        fig4.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#2a2a2a')
+                      color_discrete_sequence=['#38bdf8'])
+        fig4.update_layout(**dark_chart_layout)
         st.plotly_chart(fig4, use_container_width=True)
 
-# Page 3: Warehouse Inventory Analytics
+# --- PAGE 3: Warehouse Inventory Analytics ---
 elif nav_selection == "Warehouse Inventory Analytics":
     st.title("Warehouse Inventory & Stock Levels")
     st.markdown("---")
@@ -221,22 +235,18 @@ elif nav_selection == "Warehouse Inventory Analytics":
         st.subheader("Stock Valuation by Category")
         cat_val = inventory_df.groupby('category')['inventory_value_inr'].sum().reset_index()
         fig5 = px.bar(cat_val, x='category', y='inventory_value_inr', color='category',
-                      color_discrete_sequence=px.colors.qualitative.Pastel1)
-        fig5.update_layout(**chart_layout)
-        fig5.update_xaxes(showgrid=False)
-        fig5.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#2a2a2a')
+                      color_discrete_sequence=px.colors.qualitative.Vivid)
+        fig5.update_layout(**dark_chart_layout)
         st.plotly_chart(fig5, use_container_width=True)
 
     with col_w2:
         st.subheader("Available Stock vs Reorder Level")
         fig6 = px.scatter(inventory_df, x='reorder_level', y='available_stock', color='category',
-                          color_discrete_sequence=px.colors.qualitative.Bold)
-        fig6.update_layout(**chart_layout)
-        fig6.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#2a2a2a')
-        fig6.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#2a2a2a')
+                          color_discrete_sequence=px.colors.qualitative.Dark24)
+        fig6.update_layout(**dark_chart_layout)
         st.plotly_chart(fig6, use_container_width=True)
 
-# Page 4: Delay Risk Simulator
+# --- PAGE 4: Delay Risk Simulator ---
 elif nav_selection == "Real-Time Delay Risk Simulator":
     st.title("Predictive Shipment Delay Simulator")
     st.markdown("---")
