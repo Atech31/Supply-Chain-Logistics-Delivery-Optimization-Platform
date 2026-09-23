@@ -9,31 +9,67 @@ st.set_page_config(
     layout="wide"
 )
 
-# 2. Comprehensive Dark Theme CSS Overrides
+# 2. Comprehensive CSS Rules Fixing Selectbox & Dropdown Contrast
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
 
-    /* Global Font & Background Setup */
+    /* Global Font & Main Canvas Setup */
     html, body, .stApp, [data-testid="stHeader"], [data-testid="stSidebar"] {
         background-color: #0e0e10 !important;
         color: #ffffff !important;
         font-family: 'Times New Roman', Times, serif !important;
     }
 
-    /* Force ALL Text, Headers, Paragraphs, and Labels to White/Light Grey */
-    h1, h2, h3, h4, h5, h6, p, span, div, label, li, a {
+    /* Force Header & Text Elements to White */
+    h1, h2, h3, h4, h5, h6, p, span, label, li {
         color: #ffffff !important;
         font-family: 'Times New Roman', Times, serif !important;
     }
 
-    /* Metric Cards Styling (Dark Card + Bright White Numbers) */
+    /* ========================================================= */
+    /* FIX FOR SELECTBOX & DROPDOWN CONTRAST (HIGH VISIBILITY)   */
+    /* ========================================================= */
+    
+    /* 1. Target the Selectbox Box Container */
+    div[data-baseweb="select"] {
+        background-color: #1e1e24 !important;
+        border: 1px solid #444450 !important;
+        border-radius: 6px !important;
+    }
+
+    /* 2. Force Selected Text inside the Box to Bright White */
+    div[data-baseweb="select"] * {
+        color: #ffffff !important;
+        font-size: 15px !important;
+        font-weight: 500 !important;
+        background-color: transparent !important;
+    }
+
+    /* 3. Target the Dropdown List Menu Popover */
+    div[data-baseweb="popover"], ul[role="listbox"] {
+        background-color: #1e1e24 !important;
+        border: 1px solid #444450 !important;
+    }
+
+    /* 4. Target Individual Options inside Dropdown Menu */
+    li[role="option"] {
+        background-color: #1e1e24 !important;
+        color: #ffffff !important;
+    }
+
+    /* 5. Highlight Option on Hover */
+    li[role="option"]:hover, li[aria-selected="true"] {
+        background-color: #2a2a35 !important;
+        color: #ffffff !important;
+    }
+
+    /* Metric Cards Styling */
     [data-testid="stMetric"] {
         background-color: #1a1a1e !important;
         border: 1px solid #2d2d35 !important;
         border-radius: 8px !important;
         padding: 16px !important;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4) !important;
     }
 
     [data-testid="stMetricValue"] * {
@@ -51,17 +87,6 @@ st.markdown("""
     [data-testid="stSidebar"] {
         background-color: #141418 !important;
         border-right: 1px solid #2d2d35 !important;
-    }
-
-    /* Form Controls & Dropdown Fixes for Dark Mode */
-    div[class*="stSelectbox"], div[class*="stSlider"] {
-        color: #ffffff !important;
-    }
-
-    .stSelectbox > div > div {
-        background-color: #1a1a1e !important;
-        color: #ffffff !important;
-        border: 1px solid #333340 !important;
     }
 
     /* Fixed Sidebar Footer for Name */
