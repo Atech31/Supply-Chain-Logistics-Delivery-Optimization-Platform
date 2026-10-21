@@ -1,4 +1,4 @@
-# 🚚 Supply Chain OS — Logistics & Warehouse Intelligence Platform
+#   Supply Chain OS — Logistics & Warehouse Intelligence Platform
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://supplyd.streamlit.app/)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
@@ -12,20 +12,20 @@ An enterprise-grade Data Engineering and Analytics platform built with Python, S
 
 ## 📊 Modules & Capabilities
 
-### 1. 📌 Executive Logistics Control Center
+### 1.   Executive Logistics Control Center
 * **KPI Metrics**: Real-time tracking of active shipments, overall on-time delivery percentage, average transit delays, and total freight expenditure.
 * **Cost vs. Distance Analysis**: Scatter visualizer evaluating logistics cost trajectories across multiple transportation modes.
 * **Delay Root-Cause Breakdown**: Interactive pie distribution highlighting core operational bottlenecks (weather, customs, carrier availability, etc.).
 
-### 2. 🚛 Delivery Delay & Carrier Performance
+### 2.   Delivery Delay & Carrier Performance
 * **Modal Delay Diagnostics**: Comparative breakdown of average transit delays grouped by transport modes (*Road, Air, Rail, Express Highway*).
 * **Customer Satisfaction Scoring**: Box plots analyzing correlation between shipment delays and post-delivery satisfaction ratings.
 
-### 3. 📦 Warehouse Inventory Analytics
+### 3.   Warehouse Inventory Analytics
 * **Valuation by Category**: Aggregated stock valuation metrics across product categories.
 * **Safety Stock & Reorder Analysis**: Bivariate analysis comparing available inventory against dynamic reorder thresholds.
 
-### 4. ⚡ Real-Time Delay Risk Simulator
+### 4.   Real-Time Delay Risk Simulator
 * **Interactive Parameter Tuning**: Adjust shipment distance, transport mode, and priority level using live input controls.
 * **Predictive Delay Calculation**: Algorithmic delay estimation engine assisting logistics dispatchers in proactive risk management.
 
@@ -40,7 +40,7 @@ An enterprise-grade Data Engineering and Analytics platform built with Python, S
 
 ---
 
-## 📁 Project Directory Structure
+##   Project Directory Structure
 
 ```text
 ├── app.py                          # Primary Streamlit application entry point
